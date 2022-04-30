@@ -97,7 +97,7 @@ variable "storage_account_enable_https_traffic_only" {
   default     = true
 }
 
-variable "app_service_plan_id" {
+variable "service_plan_id" {
   description = "Id of the App Service Plan for Function App hosting"
   type        = string
 }

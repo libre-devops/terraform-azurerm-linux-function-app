@@ -1,9 +1,9 @@
-resource "azurerm_function_app" "function_app" {
+resource "azurerm_linux_function_app" "function_app" {
   count = var.app_amount
   name = "${var.app_name}${format("%02d", count.index + 1)}"
-  app_service_plan_id        = var.app_service_plan_id
+  service_plan_id            = var.service_plan_id
   location                   = var.location
-  resource_group_name        = var.resource_group_name
+  resource_group_name        = var.rg_name
   storage_account_name       = var.storage_account_name
   storage_account_access_key = var.storage_account_access_key
   os_type                    = var.os_type
@@ -71,6 +71,6 @@ resource "azurerm_function_app" "function_app" {
 resource "azurerm_app_service_virtual_network_swift_connection" "function_vnet_integration" {
   count = var.function_app_vnet_integration_enabled ? 1 : 0
 
-  app_service_id = azurerm_function_app.function_app.id
+  app_service_id = azurerm_linux_function_app.function_app.id
   subnet_id      = var.function_app_vnet_integration_subnet_id
 }
