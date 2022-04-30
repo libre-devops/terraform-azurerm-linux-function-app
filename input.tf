@@ -1,3 +1,13 @@
+variable "app_name" {
+  description = "The name of the function app"
+  type = string
+}
+
+variable "app_amount" {
+  description = "The amount of apps to be created"
+  type = number
+}
+
 variable "environment" {
   description = "Project environment"
   type        = string
@@ -8,6 +18,11 @@ variable "stack" {
   type        = string
 }
 
+variable "storage_account_name" {
+  description = "Name of storage account"
+  type = string
+}
+
 variable "tags" {
   type        = map(string)
   description = "A map of the tags to use on the resources that are deployed with this module."
@@ -16,7 +31,7 @@ variable "tags" {
   }
 }
 
-variable "resource_group_name" {
+variable "rg_name" {
   description = "Resource group name"
   type        = string
 }
@@ -41,6 +56,21 @@ variable "storage_account_access_key" {
   description = "Access key the storage account to use. If null a new storage account is created"
   type        = string
   default     = null
+}
+
+variable "scm_subnets" {
+  description = "Subnets for SCM"
+  type = list(string)
+}
+
+variable "scm_cidrs" {
+  description = "CIDRs for SCM"
+  type = list(string)
+}
+
+variable "scm_service_tags" {
+  description = "Service tags for SCM"
+  type = list(string)
 }
 
 variable "storage_account_kind" {

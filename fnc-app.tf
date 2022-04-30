@@ -1,11 +1,11 @@
 resource "azurerm_function_app" "function_app" {
-  name = var.function_app_name
-
+  count = var.app_amount
+  name = "${var.app_name}${format("%02d", count.index + 1)}"
   app_service_plan_id        = var.app_service_plan_id
   location                   = var.location
   resource_group_name        = var.resource_group_name
   storage_account_name       = var.storage_account_name
-  storage_account_access_key = var.storage_account_access_key == null ? azurerm_storage_account.storage[0].primary_access_key : var.storage_account_access_key
+  storage_account_access_key = var.storage_account_access_key
   os_type                    = var.os_type
 
   app_settings = var.function_app_application_settings
