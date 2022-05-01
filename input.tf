@@ -1,6 +1,7 @@
-variable "app_amount" {
-  description = "The amount of apps to be created"
-  type        = number
+variable "active_directory_auth_setttings" {
+  description = "Acitve directory authentication provider settings for app service"
+  type        = any
+  default     = {}
 }
 
 variable "app_name" {
@@ -8,45 +9,15 @@ variable "app_name" {
   type        = string
 }
 
-variable "application_insights_enabled" {
-  description = "Enable or disable the Application Insights deployment"
-  type        = bool
-  default     = true
-}
-
-variable "application_insights_id" {
-  description = "ID of the existing Application Insights to use instead of deploying a new one."
+variable "app_service_plan_id" {
+  description = "Id of the App Service Plan for Function App hosting"
   type        = string
-  default     = null
 }
 
-variable "application_insights_type" {
-  description = "Application Insights type if need to be generated"
-  type        = string
-  default     = "web"
-}
-
-variable "application_zip_package_path" {
-  description = "Local or remote path of a zip package to deploy on the Function App"
-  type        = string
-  default     = null
-}
-
-variable "authorized_ips" {
-  description = "IPs restriction for Function. See documentation https://www.terraform.io/docs/providers/azurerm/r/function_app.html#ip_restriction"
-  type        = list(string)
+variable "connection_strings" {
+  description = "Connection strings for App Service"
+  type        = list(map(string))
   default     = []
-}
-
-variable "authorized_subnet_ids" {
-  description = "Subnets restriction for Function. See documentation https://www.terraform.io/docs/providers/azurerm/r/function_app.html#ip_restriction"
-  type        = list(string)
-  default     = []
-}
-
-variable "environment" {
-  description = "Project environment"
-  type        = string
 }
 
 variable "function_app_application_settings" {
@@ -57,8 +28,8 @@ variable "function_app_application_settings" {
 
 variable "function_app_version" {
   description = "Version of the function app runtime to use (Allowed values 2 or 3)"
-  type        = number
-  default     = 3
+  type        = string
+  default     = "~3"
 }
 
 variable "function_app_vnet_integration_enabled" {
@@ -73,14 +44,6 @@ variable "function_app_vnet_integration_subnet_id" {
   default     = null
 }
 
-# SCM parameters
-
-variable "function_language_for_linux" {
-  description = "Language of the Function App on Linux hosting, can be \"dotnet\", \"node\" or \"python\""
-  type        = string
-  default     = "dotnet"
-}
-
 variable "https_only" {
   description = "Disable http procotol and keep only https"
   type        = bool
@@ -88,21 +51,15 @@ variable "https_only" {
 }
 
 variable "identity_ids" {
-  description = "UserAssigned Identities ID to add to Function App. Mandatory if type is UserAssigned"
+  description = "Specifies a list of user managed identity ids to be assigned to the VM."
   type        = list(string)
-  default     = null
+  default     = []
 }
 
 variable "identity_type" {
-  description = "Add an Identity (MSI) to the function app. Possible values are SystemAssigned or UserAssigned"
+  description = "The Managed Service Identity Type of this Virtual Machine."
   type        = string
-  default     = "SystemAssigned"
-}
-
-variable "ip_restriction_headers" {
-  description = "IPs restriction headers for Function. See documentation https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/function_app#headers"
-  type        = map(list(string))
-  default     = null
+  default     = ""
 }
 
 variable "location" {
@@ -110,15 +67,9 @@ variable "location" {
   type        = string
 }
 
-variable "location_short" {
-  description = "Short string for Azure location."
-  type        = string
-}
-
 variable "os_type" {
   description = "A string indicating the Operating System type for this function app."
   type        = string
-  default     = null
 }
 
 variable "rg_name" {
@@ -126,42 +77,9 @@ variable "rg_name" {
   type        = string
 }
 
-variable "scm_authorized_ips" {
-  description = "SCM IPs restriction for Function. See documentation https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/function_app#scm_ip_restriction"
-  type        = list(string)
-  default     = []
-}
-
-variable "scm_authorized_subnet_ids" {
-  description = "SCM subnets restriction for Function. See documentation https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/function_app#scm_ip_restriction"
-  type        = list(string)
-  default     = []
-}
-
-variable "scm_cidrs" {
-  description = "CIDRs for SCM"
-  type        = list(string)
-}
-
-variable "scm_ip_restriction_headers" {
-  description = "IPs restriction headers for Function. See documentation https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/function_app#scm_ip_restriction"
-  type        = map(list(string))
-  default     = null
-}
-
-variable "scm_service_tags" {
-  description = "Service tags for SCM"
-  type        = list(string)
-}
-
-variable "scm_subnets" {
-  description = "Subnets for SCM"
-  type        = list(string)
-}
-
-variable "service_plan_id" {
-  description = "Id of the App Service Plan for Function App hosting"
-  type        = string
+variable "settings" {
+  description = "Specifies the Authentication enabled or not"
+  default     = false
 }
 
 variable "site_config" {
@@ -170,44 +88,20 @@ variable "site_config" {
   default     = {}
 }
 
-variable "stack" {
-  description = "Project stack name"
-  type        = string
-}
-
 variable "storage_account_access_key" {
   description = "Access key the storage account to use. If null a new storage account is created"
   type        = string
   default     = null
 }
 
-variable "storage_account_enable_advanced_threat_protection" {
-  description = "Boolean flag which controls if advanced threat protection is enabled, see [here](https://docs.microsoft.com/en-us/azure/storage/common/storage-advanced-threat-protection?tabs=azure-portal) for more information."
-  type        = bool
-  default     = false
-}
-
-variable "storage_account_enable_https_traffic_only" {
-  description = "Boolean flag which controls if https traffic only is enabled."
-  type        = bool
-  default     = true
-}
-
-variable "storage_account_kind" {
-  description = "Storage Account Kind"
-  type        = string
-  default     = "StorageV2"
-}
-
-variable "storage_account_min_tls_version" {
-  description = "Storage Account minimal TLS version"
-  type        = string
-  default     = "TLS1_2"
-}
-
 variable "storage_account_name" {
   description = "Name of storage account"
   type        = string
+}
+
+variable "storage_container_name" {
+  description = "The name of the storage container to keep backups"
+  default     = null
 }
 
 variable "tags" {
