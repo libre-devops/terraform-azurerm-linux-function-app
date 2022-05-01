@@ -9,7 +9,7 @@ variable "app_name" {
   type        = string
 }
 
-variable "app_service_plan_id" {
+variable "service_plan_id" {
   description = "Id of the App Service Plan for Function App hosting"
   type        = string
 }
@@ -56,16 +56,10 @@ variable "force_disabled_content_share" {
   default     = false
 }
 
-variable "function_app_application_settings" {
+variable "app_settings" {
   description = "Function App application settings"
-  type        = map(string)
+  type        = map(any)
   default     = {}
-}
-
-variable "function_app_version" {
-  description = "Version of the function app runtime to use (Allowed values 2 or 3)"
-  type        = string
-  default     = "~3"
 }
 
 variable "function_app_vnet_integration_enabled" {
@@ -105,11 +99,6 @@ variable "identity_type" {
 
 variable "location" {
   description = "Azure location."
-  type        = string
-}
-
-variable "os_type" {
-  description = "A string indicating the Operating System type for this function app."
   type        = string
 }
 

@@ -1,39 +1,8 @@
 resource "azurerm_linux_function_app" "function_app" {
-  name                          = var.app_name
-  app_service_plan_id           = var.app_service_plan_id
-  location                      = var.location
-  resource_group_name           = var.rg_name
-  storage_account_name          = var.storage_account_name
-  storage_account_access_key    = var.storage_account_access_key
-  os_type                       = lower(var.os_type)
-  https_only                    = var.https_only
-  app_settings                  = var.function_app_application_settings
-  version                       = var.function_app_version
-  builtin_logging_enabled       = var.builtin_logging_enabled
-  client_certificate_enabled    = var.client_certificate_enabled
-  client_certificate_mode       = var.client_certificate_mode
-  daily_memory_time_quota       = var.daily_memory_time_quota
-  enabled                       = var.enabled
-  force_disable_content_share   = var.force_disabled_content_share
-  functions_extension_version   = var.functions_extension_version
-  storage_uses_managed_identity = var.storage_uses_managed_identity
-  storage_key_vault_secret_id   = var.storage_key_vault_secret_id
-
-  dynamic "sticky_settings" {
-    for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
-    content {
-      app_settings_names      = lookup(var.settings.sticky_settings, "app_setting_names", false)
-      connection_string_names = lookup(var.settings.connection_string_names, "connection_string_name", false)
-    }
-  }
-
-  dynamic "app_service_logs" {
-    for_each = lookup(var.settings, "app_service_logs", {}) != {} ? [1] : []
-    content {
-      disk_quota_mb         = lookup(var.settings.app_service_logs, "disk_quota_mb", false)
-      retention_period_days = lookup(var.settings.retention_period_days, "retention_period_days", false)
-    }
-  }
+  name                = var.app_name
+  service_plan_id     = var.service_plan_id
+  location            = var.location
+  resource_group_name = var.rg_name
 
   dynamic "site_config" {
     for_each = lookup(var.settings, "site_config", {}) != {} ? [1] : []
@@ -87,10 +56,42 @@ resource "azurerm_linux_function_app" "function_app" {
               registry_password = lookup(var.settings.site_config.application_stack.docker, "registry_password", null)
               image_name        = lookup(var.settings.site_config.application_stack.docker, "image_name", null)
               image_tag         = lookup(var.settings.site_config.application_stack.docker, "image_tag", null)
-
-
             }
           }
+
+          dynamic "app_service_logs" {
+            for_each = lookup(var.settings.site_config, "app_service_logs", {}) != {} ? [1] : []
+            content {
+              disk_quota_mb         = lookup(var.settings.app_service_logs, "disk_quota_mb", false)
+              retention_period_days = lookup(var.settings.retention_period_days, "retention_period_days", false)
+            }
+          }
+
+        }
+      }
+
+      app_settings               = var.app_settings
+      storage_account_name       = var.storage_account_name
+      storage_account_access_key = var.storage_account_access_key
+      https_only                 = var.https_only
+
+      builtin_logging_enabled    = var.builtin_logging_enabled
+      client_certificate_enabled = var.client_certificate_enabled
+      client_certificate_mode    = var.client_certificate_mode
+      daily_memory_time_quota    = var.daily_memory_time_quota
+      enabled                    = var.enabled
+
+      functions_extension_version   = var.functions_extension_version
+      storage_uses_managed_identity = var.storage_uses_managed_identity
+      storage_key_vault_secret_id   = var.storage_key_vault_secret_id
+
+
+
+      dynamic "sticky_settings" {
+        for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
+        content {
+          app_setting_names       = lookup(var.settings.sticky_settings, "app_setting_names", false)
+          connection_string_names = lookup(var.settings.connection_string_names, "connection_string_name", false)
         }
       }
 
