@@ -66,7 +66,6 @@ resource "azurerm_linux_function_app" "function_app" {
               retention_period_days = lookup(var.settings.retention_period_days, "retention_period_days", false)
             }
           }
-
         }
       }
 
@@ -116,6 +115,7 @@ resource "azurerm_linux_function_app" "function_app" {
           action                    = lookup(ip_restriction, "action", null)
         }
       }
+
       dynamic "scm_ip_restriction" {
         for_each = try(var.settings.site_config.scm_ip_restriction, {})
 
