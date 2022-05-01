@@ -30,7 +30,7 @@ resource "azurerm_linux_function_app" "function_app" {
       #      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
       container_registry_managed_identity_client_id = lookup(var.settings.site_config, "container_registry_managed_identity_client_id", false)
       container_registry_use_managed_identity       = lookup(var.settings.site_config, "container_registry_use_managed_identity", false)
-      default_documents                             = lookup(var.settings.site_config, ["default_documents"], false)
+      default_documents                             = tolist(lookup(var.settings.site_config, "default_documents", false))
       elastic_instance_minimum                      = lookup(var.settings.site_config, "elastic_instance_minimum", null)
       ftps_state                                    = lookup(var.settings.site_config, "ftps_state", null)
       health_check_path                             = lookup(var.settings.site_config, "health_check_path", null)
@@ -51,7 +51,7 @@ resource "azurerm_linux_function_app" "function_app" {
       vnet_route_all_enabled                        = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
       worker_count                                  = lookup(var.settings.site_config, "worker_count", null)
 
-
+      // Where does this block live? It keeps throwing an error for me
       #      dynamic "sticky_settings" {
       #        for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
       #        content {
