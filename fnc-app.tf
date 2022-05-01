@@ -1,4 +1,4 @@
-resource "azurerm_function_app" "function_app" {
+resource "azurerm_linux_function_app" "function_app" {
   name                          = var.app_name
   app_service_plan_id           = var.app_service_plan_id
   location                      = var.location
@@ -9,7 +9,7 @@ resource "azurerm_function_app" "function_app" {
   https_only                    = var.https_only
   app_settings                  = var.function_app_application_settings
   version                       = var.function_app_version
-  builtin_logging_enable        = var.builtin_logging_enabled
+  builtin_logging_enabled       = var.builtin_logging_enabled
   client_certificate_enabled    = var.client_certificate_enabled
   client_certificate_mode       = var.client_certificate_mode
   daily_memory_time_quota       = var.daily_memory_time_quota
@@ -39,26 +39,35 @@ resource "azurerm_function_app" "function_app" {
     for_each = lookup(var.settings, "site_config", {}) != {} ? [1] : []
 
     content {
-      always_on                              = lookup(var.settings.site_config, "always_on", false)
-      api_definition_url                     = lookup(var.settings.site_config, "api_definition_url", false)
-      api_management_id                      = lookup(var.settings.site_config, "api_management_id", false)
-      app_command_line                       = lookup(var.settings.site_config, "app_command_line", false)
-      application_insights_connection_string = lookup(var.settings.site_config, "application_insights_connection_string", false)
-      application_insights_keys              = lookup(var.settings.site_config, "application_insights_keys", false)
-      app_scale_limit                        = lookup(var.settings.site_config, "app_scale_limit", null)
-      elastic_instance_minimum               = lookup(var.settings.site_config, "elastic_instance_minimum", null)
-      health_check_path                      = lookup(var.settings.site_config, "health_check_path", null)
-      min_tls_version                        = lookup(var.settings.site_config, "min_tls_version", null)
-      pre_warmed_instance_count              = lookup(var.settings.site_config, "pre_warmed_instance_count", null)
-      runtime_scale_monitoring_enabled       = lookup(var.settings.site_config, "runtime_scale_monitoring_enabled", null)
-      dotnet_framework_version               = lookup(var.settings.site_config, "dotnet_framework_version", null)
-      ftps_state                             = lookup(var.settings.site_config, "ftps_state", null)
-      http2_enabled                          = lookup(var.settings.site_config, "http2_enabled", null)
-      use_32_bit_worker_process              = lookup(var.settings.site_config, "use_32_bit_worker_process", null)
-      websockets_enabled                     = lookup(var.settings.site_config, "websockets_enabled", null)
-      scm_type                               = lookup(var.settings.site_config, "scm_type", null)
-      scm_use_main_ip_restriction            = lookup(var.settings.site_config, "scm_use_main_ip_restriction", null)
-      vnet_route_all_enabled                 = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
+      always_on                                     = lookup(var.settings.site_config, "always_on", false)
+      api_definition_url                            = lookup(var.settings.site_config, "api_definition_url", false)
+      api_management_id                             = lookup(var.settings.site_config, "api_management_id", false)
+      app_command_line                              = lookup(var.settings.site_config, "app_command_line", false)
+      application_insights_connection_string        = lookup(var.settings.site_config, "application_insights_connection_string", false)
+      application_insights_keys                     = lookup(var.settings.site_config, "application_insights_keys", false)
+      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
+      container_registry_managed_identity_client_id = lookup(var.settings.site_config, "container_registry_managed_identity_client_id", false)
+      container_registry_use_managed_identity       = lookup(var.settings.site_config, "container_registry_use_managed_identity", false)
+      default_documents                             = lookup(var.settings.site_config, "default_documents", false)
+      elastic_instance_minimum                      = lookup(var.settings.site_config, "elastic_instance_minimum", null)
+      ftps_state                                    = lookup(var.settings.site_config, "ftps_state", null)
+      health_check_path                             = lookup(var.settings.site_config, "health_check_path", null)
+      health_check_eviction_time_in_min             = lookup(var.settings.site_config, "health_check_eviction_time_in_min", null)
+      http2_enabled                                 = lookup(var.settings.site_config, "http2_enabled", null)
+      load_balancing_mode                           = lookup(var.settings.site_config, "load_balancing_mode", null)
+      managed_pipeline_mode                         = lookup(var.settings.site_config, "managed_pipeline_mode", null)
+      minimum_tls_version                           = lookup(var.settings.site_config, "minimum_tls_version", null)
+      pre_warmed_instance_count                     = lookup(var.settings.site_config, "pre_warmed_instance_count", null)
+      remote_debugging_enabled                      = lookup(var.settings.site_config, "remote_debugging_enabled", null)
+      remote_debugging_version                      = lookup(var.settings.site_config, "remote_debugging_version", null)
+      runtime_scale_monitoring_enabled              = lookup(var.settings.site_config, "runtime_scale_monitoring_enabled", null)
+      scm_minimum_tls_version                       = lookup(var.settings.site_config, "scm_minimum_tls_version", null)
+      scm_use_main_ip_restriction                   = lookup(var.settings.site_config, "scm_use_main_ip_restriction", null)
+      use_32_bit_worker                             = lookup(var.settings.site_config, "use_32_bit_worker", null)
+      app_scale_limit                               = lookup(var.settings.site_config, "app_scale_limit", null)
+      websockets_enabled                            = lookup(var.settings.site_config, "websockets_enabled", null)
+      vnet_route_all_enabled                        = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
+      worker_count                                  = lookup(var.settings.site_config, "worker_count", null)
 
       dynamic "application_stack" {
         for_each = lookup(var.settings.site_config, "application_stack", {}) != {} ? [1] : []
@@ -99,7 +108,11 @@ resource "azurerm_function_app" "function_app" {
 
         content {
           ip_address                = lookup(ip_restriction, "ip_address", null)
+          service_tag               = lookup(ip_restriction, "service_tag", null)
           virtual_network_subnet_id = lookup(ip_restriction, "virtual_network_subnet_id", null)
+          name                      = lookup(ip_restriction, "name", null)
+          priority                  = lookup(ip_restriction, "priority", null)
+          action                    = lookup(ip_restriction, "action", null)
         }
       }
       dynamic "scm_ip_restriction" {
@@ -277,6 +290,6 @@ resource "azurerm_function_app" "function_app" {
 resource "azurerm_app_service_virtual_network_swift_connection" "function_vnet_integration" {
   count = var.function_app_vnet_integration_enabled ? 1 : 0
 
-  app_service_id = azurerm_function_app.function_app.id
+  app_service_id = azurerm_linux_function_app.function_app.id
   subnet_id      = var.function_app_vnet_integration_subnet_id
 }

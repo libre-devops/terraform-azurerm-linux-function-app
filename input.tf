@@ -1,5 +1,5 @@
 variable "active_directory_auth_setttings" {
-  description = "Acitve directory authentication provider settings for app service"
+  description = "Active directory authentication provider settings for app service"
   type        = any
   default     = {}
 }
@@ -14,10 +14,46 @@ variable "app_service_plan_id" {
   type        = string
 }
 
+variable "builtin_logging_enabled" {
+  type        = bool
+  description = "Whether AzureWebJobsDashboards should be enabled, default is true"
+  default     = true
+}
+
+variable "client_certificate_enabled" {
+  type        = bool
+  description = "Whether client certificate auth is enabled, default is false"
+  default     = false
+}
+
+variable "client_certificate_mode" {
+  type        = string
+  description = "The option for client certificates"
+  default     = ""
+}
+
 variable "connection_strings" {
   description = "Connection strings for App Service"
   type        = list(map(string))
   default     = []
+}
+
+variable "daily_memory_time_quota" {
+  type        = number
+  description = "The amount of memory in gigabyte-seconds that your app can consume per day, defaults to 0"
+  default     = 0
+}
+
+variable "enabled" {
+  type        = bool
+  description = "Is the function app enabled? Default is true"
+  default     = true
+}
+
+variable "force_disabled_content_share" {
+  type        = bool
+  description = "Should content share be disabled in storage account? Default is false"
+  default     = false
 }
 
 variable "function_app_application_settings" {
@@ -42,6 +78,11 @@ variable "function_app_vnet_integration_subnet_id" {
   description = "ID of the subnet to associate with the Function App (VNet integration)"
   type        = string
   default     = null
+}
+
+variable "functions_extension_version" {
+  type        = string
+  description = "The function extension version"
 }
 
 variable "https_only" {
@@ -102,6 +143,18 @@ variable "storage_account_name" {
 variable "storage_container_name" {
   description = "The name of the storage container to keep backups"
   default     = null
+}
+
+variable "storage_key_vault_secret_id" {
+  type        = string
+  description = "The secret ID for the connection string of the storage account used by the function app"
+  default     = ""
+}
+
+variable "storage_uses_managed_identity" {
+  type        = string
+  description = "If you want the storage account to use a managed identity instead of a access key"
+  default     = "false"
 }
 
 variable "tags" {
