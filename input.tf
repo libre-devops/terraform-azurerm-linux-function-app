@@ -29,7 +29,7 @@ variable "client_certificate_enabled" {
 variable "client_certificate_mode" {
   type        = string
   description = "The option for client certificates"
-  default     = ""
+  default     = "Optional"
 }
 
 variable "connection_strings" {

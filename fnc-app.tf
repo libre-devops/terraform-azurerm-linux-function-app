@@ -5,29 +5,31 @@ resource "azurerm_linux_function_app" "function_app" {
   resource_group_name = var.rg_name
   app_settings        = var.app_settings
 
-  storage_account_name          = var.storage_account_name
-  storage_account_access_key    = var.storage_account_access_key
-  https_only                    = var.https_only
-  builtin_logging_enabled       = var.builtin_logging_enabled
-  client_certificate_enabled    = var.client_certificate_enabled
-  client_certificate_mode       = var.client_certificate_mode
-  daily_memory_time_quota       = var.daily_memory_time_quota
-  enabled                       = var.enabled
-  functions_extension_version   = var.functions_extension_version
-  storage_uses_managed_identity = var.storage_uses_managed_identity
-  storage_key_vault_secret_id   = var.storage_key_vault_secret_id
+  https_only                  = var.https_only
+  builtin_logging_enabled     = var.builtin_logging_enabled
+  client_certificate_enabled  = var.client_certificate_enabled
+  client_certificate_mode     = var.client_certificate_mode
+  daily_memory_time_quota     = var.daily_memory_time_quota
+  enabled                     = var.enabled
+  functions_extension_version = var.functions_extension_version
+
+  storage_account_name       = var.storage_account_name != null ? var.storage_account_name : null
+  storage_account_access_key = var.storage_account_access_key
+
+  storage_key_vault_secret_id   = var.storage_account_name == null ? var.storage_key_vault_secret_id : null
+  storage_uses_managed_identity = var.storage_account_access_key != null ? var.storage_uses_managed_identity : null
 
   dynamic "site_config" {
     for_each = lookup(var.settings, "site_config", {}) != {} ? [1] : []
 
     content {
       always_on                                     = lookup(var.settings.site_config, "always_on", false)
-      api_definition_url                            = lookup(var.settings.site_config, "api_definition_url", false)
+      api_definition_url                            = lookup(var.settings.site_config, "api_definition_url", null)
       api_management_api_id                         = lookup(var.settings.site_config, "api_management_api_id", false)
       app_command_line                              = lookup(var.settings.site_config, "app_command_line", false)
       application_insights_connection_string        = lookup(var.settings.site_config, "application_insights_connection_string", false)
       application_insights_key                      = lookup(var.settings.site_config, "application_insights_key", false)
-      container_registry_managed_identity_client_id = lookup(var.settings.site_config, "container_registry_managed_identity_client_id", false)
+      container_registry_managed_identity_client_id = lookup(var.settings.site_config, "container_registry_managed_identity_client_id", null)
       container_registry_use_managed_identity       = lookup(var.settings.site_config, "container_registry_use_managed_identity", false)
       elastic_instance_minimum                      = lookup(var.settings.site_config, "elastic_instance_minimum", null)
       ftps_state                                    = lookup(var.settings.site_config, "ftps_state", null)
@@ -48,6 +50,7 @@ resource "azurerm_linux_function_app" "function_app" {
       websockets_enabled                            = lookup(var.settings.site_config, "websockets_enabled", null)
       vnet_route_all_enabled                        = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
       worker_count                                  = lookup(var.settings.site_config, "worker_count", null)
+      default_documents                             = try(tolist(var.settings.site_config.default_documents, null))
 
       // Expects a list, but doesn't like to list conversion
       # default_documents                             = tolist(lookup(var.settings.site_config, "default_documents", false))
