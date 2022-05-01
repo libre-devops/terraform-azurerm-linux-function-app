@@ -10,11 +10,11 @@ resource "azurerm_linux_function_app" "function_app" {
     content {
       always_on                                     = lookup(var.settings.site_config, "always_on", false)
       api_definition_url                            = lookup(var.settings.site_config, "api_definition_url", false)
-      api_management_id                             = lookup(var.settings.site_config, "api_management_id", false)
+      api_management_api_id                             = lookup(var.settings.site_config, "api_management_api_id", false)
       app_command_line                              = lookup(var.settings.site_config, "app_command_line", false)
       application_insights_connection_string        = lookup(var.settings.site_config, "application_insights_connection_string", false)
-      application_insights_keys                     = lookup(var.settings.site_config, "application_insights_keys", false)
-      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
+      application_insights_key                     = lookup(var.settings.site_config, "application_insights_key", false)
+#      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
       container_registry_managed_identity_client_id = lookup(var.settings.site_config, "container_registry_managed_identity_client_id", false)
       container_registry_use_managed_identity       = lookup(var.settings.site_config, "container_registry_use_managed_identity", false)
       default_documents                             = lookup(var.settings.site_config, "default_documents", false)
@@ -58,33 +58,32 @@ resource "azurerm_linux_function_app" "function_app" {
               image_tag         = lookup(var.settings.site_config.application_stack.docker, "image_tag", null)
             }
           }
-
-          dynamic "app_service_logs" {
-            for_each = lookup(var.settings.site_config, "app_service_logs", {}) != {} ? [1] : []
-            content {
-              disk_quota_mb         = lookup(var.settings.app_service_logs, "disk_quota_mb", false)
-              retention_period_days = lookup(var.settings.retention_period_days, "retention_period_days", false)
-            }
-          }
         }
       }
 
-      app_settings               = var.app_settings
-      storage_account_name       = var.storage_account_name
-      storage_account_access_key = var.storage_account_access_key
-      https_only                 = var.https_only
+      dynamic "app_service_logs" {
+        for_each = lookup(var.settings.site_config, "app_service_logs", {}) != {} ? [1] : []
+        content {
+          disk_quota_mb         = lookup(var.settings.app_service_logs, "disk_quota_mb", false)
+          retention_period_days = lookup(var.settings.retention_period_days, "retention_period_days", false)
+        }
+      }
 
-      builtin_logging_enabled    = var.builtin_logging_enabled
-      client_certificate_enabled = var.client_certificate_enabled
-      client_certificate_mode    = var.client_certificate_mode
-      daily_memory_time_quota    = var.daily_memory_time_quota
-      enabled                    = var.enabled
+    app_settings = {
 
-      functions_extension_version   = var.functions_extension_version
-      storage_uses_managed_identity = var.storage_uses_managed_identity
-      storage_key_vault_secret_id   = var.storage_key_vault_secret_id
+        storage_account_name       = var.storage_account_name
+        storage_account_access_key = var.storage_account_access_key
+        https_only                 = var.https_only
 
+        builtin_logging_enabled    = var.builtin_logging_enabled
+        client_certificate_enabled = var.client_certificate_enabled
+        client_certificate_mode    = var.client_certificate_mode
+        daily_memory_time_quota    = var.daily_memory_time_quota
+        enabled                    = var.enabled
 
+        functions_extension_version   = var.functions_extension_version
+        storage_uses_managed_identity = var.storage_uses_managed_identity
+        storage_key_vault_secret_id   = var.storage_key_vault_secret_id
 
       dynamic "sticky_settings" {
         for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
@@ -92,6 +91,7 @@ resource "azurerm_linux_function_app" "function_app" {
           app_setting_names       = lookup(var.settings.sticky_settings, "app_setting_names", false)
           connection_string_names = lookup(var.settings.connection_string_names, "connection_string_name", false)
         }
+      }
       }
 
       dynamic "cors" {
@@ -146,7 +146,7 @@ resource "azurerm_linux_function_app" "function_app" {
 
     content {
       enabled                        = lookup(var.settings.auth_settings, "enabled", false)
-      additional_login_params        = lookup(var.settings.auth_settings, "additional_login_params", null)
+      additional_login_parameters        = lookup(var.settings.auth_settings, "additional_login_parameters", null)
       allowed_external_redirect_urls = lookup(var.settings.auth_settings, "allowed_external_redirect_urls", null)
       default_provider               = lookup(var.settings.auth_settings, "default_provider", null)
       issuer                         = lookup(var.settings.auth_settings, "issuer", null)
@@ -226,18 +226,6 @@ resource "azurerm_linux_function_app" "function_app" {
     }
   }
 
-  dynamic "source_control" {
-    for_each = lookup(var.settings, "source_control", {}) != {} ? [1] : []
-
-    content {
-      repo_url           = var.settings.source_control.repo_url
-      branch             = lookup(var.settings.source_control, "branch", null)
-      manual_integration = lookup(var.settings.source_control, "manual_integration", null)
-      rollback_enabled   = lookup(var.settings.source_control, "rollback_enabled", null)
-      use_mercurial      = lookup(var.settings.source_control, "use_mercurial", null)
-    }
-  }
-
   lifecycle {
     ignore_changes = [
       app_settings.WEBSITE_RUN_FROM_ZIP,
@@ -263,7 +251,7 @@ resource "azurerm_linux_function_app" "function_app" {
           frequency_interval       = var.settings.backup.schedule.frequency_interval
           frequency_unit           = lookup(var.settings.backup.schedule, "frequency_unit", null)
           keep_at_least_one_backup = lookup(var.settings.backup.schedule, "keep_at_least_one_backup", null)
-          retention_period_in_days = lookup(var.settings.backup.schedule, "retention_period_in_days", null)
+          retention_period_days = lookup(var.settings.backup.schedule, "retention_period_days", null)
           start_time               = lookup(var.settings.backup.schedule, "start_time", null)
         }
       }
