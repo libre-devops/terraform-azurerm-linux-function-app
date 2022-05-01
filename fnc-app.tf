@@ -8,13 +8,13 @@ resource "azurerm_linux_function_app" "function_app" {
     for_each = lookup(var.settings, "site_config", {}) != {} ? [1] : []
 
     content {
-      always_on                                     = lookup(var.settings.site_config, "always_on", false)
-      api_definition_url                            = lookup(var.settings.site_config, "api_definition_url", false)
-      api_management_api_id                             = lookup(var.settings.site_config, "api_management_api_id", false)
-      app_command_line                              = lookup(var.settings.site_config, "app_command_line", false)
-      application_insights_connection_string        = lookup(var.settings.site_config, "application_insights_connection_string", false)
-      application_insights_key                     = lookup(var.settings.site_config, "application_insights_key", false)
-#      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
+      always_on                              = lookup(var.settings.site_config, "always_on", false)
+      api_definition_url                     = lookup(var.settings.site_config, "api_definition_url", false)
+      api_management_api_id                  = lookup(var.settings.site_config, "api_management_api_id", false)
+      app_command_line                       = lookup(var.settings.site_config, "app_command_line", false)
+      application_insights_connection_string = lookup(var.settings.site_config, "application_insights_connection_string", false)
+      application_insights_key               = lookup(var.settings.site_config, "application_insights_key", false)
+      #      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
       container_registry_managed_identity_client_id = lookup(var.settings.site_config, "container_registry_managed_identity_client_id", false)
       container_registry_use_managed_identity       = lookup(var.settings.site_config, "container_registry_use_managed_identity", false)
       default_documents                             = lookup(var.settings.site_config, "default_documents", false)
@@ -69,7 +69,7 @@ resource "azurerm_linux_function_app" "function_app" {
         }
       }
 
-    app_settings = {
+      app_settings = {
 
         storage_account_name       = var.storage_account_name
         storage_account_access_key = var.storage_account_access_key
@@ -84,14 +84,6 @@ resource "azurerm_linux_function_app" "function_app" {
         functions_extension_version   = var.functions_extension_version
         storage_uses_managed_identity = var.storage_uses_managed_identity
         storage_key_vault_secret_id   = var.storage_key_vault_secret_id
-
-      dynamic "sticky_settings" {
-        for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
-        content {
-          app_setting_names       = lookup(var.settings.sticky_settings, "app_setting_names", false)
-          connection_string_names = lookup(var.settings.connection_string_names, "connection_string_name", false)
-        }
-      }
       }
 
       dynamic "cors" {
@@ -146,7 +138,7 @@ resource "azurerm_linux_function_app" "function_app" {
 
     content {
       enabled                        = lookup(var.settings.auth_settings, "enabled", false)
-      additional_login_parameters        = lookup(var.settings.auth_settings, "additional_login_parameters", null)
+      additional_login_parameters    = lookup(var.settings.auth_settings, "additional_login_parameters", null)
       allowed_external_redirect_urls = lookup(var.settings.auth_settings, "allowed_external_redirect_urls", null)
       default_provider               = lookup(var.settings.auth_settings, "default_provider", null)
       issuer                         = lookup(var.settings.auth_settings, "issuer", null)
@@ -251,7 +243,7 @@ resource "azurerm_linux_function_app" "function_app" {
           frequency_interval       = var.settings.backup.schedule.frequency_interval
           frequency_unit           = lookup(var.settings.backup.schedule, "frequency_unit", null)
           keep_at_least_one_backup = lookup(var.settings.backup.schedule, "keep_at_least_one_backup", null)
-          retention_period_days = lookup(var.settings.backup.schedule, "retention_period_days", null)
+          retention_period_days    = lookup(var.settings.backup.schedule, "retention_period_days", null)
           start_time               = lookup(var.settings.backup.schedule, "start_time", null)
         }
       }
