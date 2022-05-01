@@ -38,25 +38,26 @@ resource "azurerm_linux_function_app" "function_app" {
       websockets_enabled                            = lookup(var.settings.site_config, "websockets_enabled", null)
       vnet_route_all_enabled                        = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
       worker_count                                  = lookup(var.settings.site_config, "worker_count", null)
-      storage_account_name                          = var.storage_account_name
-      storage_account_access_key                    = var.storage_account_access_key
-      https_only                                    = var.https_only
-      builtin_logging_enabled                       = var.builtin_logging_enabled
-      client_certificate_enabled                    = var.client_certificate_enabled
-      client_certificate_mode                       = var.client_certificate_mode
-      daily_memory_time_quota                       = var.daily_memory_time_quota
-      enabled                                       = var.enabled
-      functions_extension_version                   = var.functions_extension_version
-      storage_uses_managed_identity                 = var.storage_uses_managed_identity
-      storage_key_vault_secret_id                   = var.storage_key_vault_secret_id
 
-      dynamic "sticky_settings" {
-        for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
-        content {
-          app_setting_names       = lookup(var.settings.sticky_settings, "app_setting_names", false)
-          connection_string_names = lookup(var.settings.connection_string_names, "connection_string_name", false)
-        }
-      }
+      storage_account_name          = var.storage_account_name
+      storage_account_access_key    = var.storage_account_access_key
+      https_only                    = var.https_only
+      builtin_logging_enabled       = var.builtin_logging_enabled
+      client_certificate_enabled    = var.client_certificate_enabled
+      client_certificate_mode       = var.client_certificate_mode
+      daily_memory_time_quota       = var.daily_memory_time_quota
+      enabled                       = var.enabled
+      functions_extension_version   = var.functions_extension_version
+      storage_uses_managed_identity = var.storage_uses_managed_identity
+      storage_key_vault_secret_id   = var.storage_key_vault_secret_id
+
+      #      dynamic "sticky_settings" {
+      #        for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
+      #        content {
+      #          app_setting_names       = lookup(var.settings.sticky_settings, "app_setting_names", false)
+      #          connection_string_names = lookup(var.settings.connection_string_names, "connection_string_name", false)
+      #        }
+      #      }
 
       dynamic "application_stack" {
         for_each = lookup(var.settings.site_config, "application_stack", {}) != {} ? [1] : []
