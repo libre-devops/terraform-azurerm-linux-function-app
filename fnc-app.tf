@@ -1,9 +1,20 @@
 resource "azurerm_linux_function_app" "function_app" {
-  name                = var.app_name
-  service_plan_id     = var.service_plan_id
-  location            = var.location
-  resource_group_name = var.rg_name
-  app_settings        = var.app_settings
+  name                          = var.app_name
+  service_plan_id               = var.service_plan_id
+  location                      = var.location
+  resource_group_name           = var.rg_name
+  app_settings                  = var.app_settings
+  storage_account_name          = var.storage_account_name
+  storage_account_access_key    = var.storage_account_access_key
+  https_only                    = var.https_only
+  builtin_logging_enabled       = var.builtin_logging_enabled
+  client_certificate_enabled    = var.client_certificate_enabled
+  client_certificate_mode       = var.client_certificate_mode
+  daily_memory_time_quota       = var.daily_memory_time_quota
+  enabled                       = var.enabled
+  functions_extension_version   = var.functions_extension_version
+  storage_uses_managed_identity = var.storage_uses_managed_identity
+  storage_key_vault_secret_id   = var.storage_key_vault_secret_id
 
   dynamic "site_config" {
     for_each = lookup(var.settings, "site_config", {}) != {} ? [1] : []
@@ -39,17 +50,6 @@ resource "azurerm_linux_function_app" "function_app" {
       vnet_route_all_enabled                        = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
       worker_count                                  = lookup(var.settings.site_config, "worker_count", null)
 
-      storage_account_name          = var.storage_account_name
-      storage_account_access_key    = var.storage_account_access_key
-      https_only                    = var.https_only
-      builtin_logging_enabled       = var.builtin_logging_enabled
-      client_certificate_enabled    = var.client_certificate_enabled
-      client_certificate_mode       = var.client_certificate_mode
-      daily_memory_time_quota       = var.daily_memory_time_quota
-      enabled                       = var.enabled
-      functions_extension_version   = var.functions_extension_version
-      storage_uses_managed_identity = var.storage_uses_managed_identity
-      storage_key_vault_secret_id   = var.storage_key_vault_secret_id
 
       #      dynamic "sticky_settings" {
       #        for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
