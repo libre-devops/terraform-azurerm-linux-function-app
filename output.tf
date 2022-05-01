@@ -24,8 +24,8 @@ output "fnc_identity" {
 }
 
 output "fnc_site_credential" {
-  value      = azurerm_linux_function_app.function_app.site_credential
-  descripton = "The site credential block"
+  value       = azurerm_linux_function_app.function_app.site_credential
+  description = "The site credential block"
 }
 
 output "kind" {
