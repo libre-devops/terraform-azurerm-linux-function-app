@@ -1,9 +1,10 @@
 resource "azurerm_linux_function_app" "function_app" {
-  name                          = var.app_name
-  service_plan_id               = var.service_plan_id
-  location                      = var.location
-  resource_group_name           = var.rg_name
-  app_settings                  = var.app_settings
+  name                = var.app_name
+  service_plan_id     = var.service_plan_id
+  location            = var.location
+  resource_group_name = var.rg_name
+  app_settings        = var.app_settings
+
   storage_account_name          = var.storage_account_name
   storage_account_access_key    = var.storage_account_access_key
   https_only                    = var.https_only
@@ -29,7 +30,7 @@ resource "azurerm_linux_function_app" "function_app" {
       #      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
       container_registry_managed_identity_client_id = lookup(var.settings.site_config, "container_registry_managed_identity_client_id", false)
       container_registry_use_managed_identity       = lookup(var.settings.site_config, "container_registry_use_managed_identity", false)
-      default_documents                             = lookup(var.settings.site_config, "default_documents", false)
+      default_documents                             = lookup(var.settings.site_config, ["default_documents"], false)
       elastic_instance_minimum                      = lookup(var.settings.site_config, "elastic_instance_minimum", null)
       ftps_state                                    = lookup(var.settings.site_config, "ftps_state", null)
       health_check_path                             = lookup(var.settings.site_config, "health_check_path", null)
