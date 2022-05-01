@@ -21,16 +21,14 @@ resource "azurerm_linux_function_app" "function_app" {
     for_each = lookup(var.settings, "site_config", {}) != {} ? [1] : []
 
     content {
-      always_on                              = lookup(var.settings.site_config, "always_on", false)
-      api_definition_url                     = lookup(var.settings.site_config, "api_definition_url", false)
-      api_management_api_id                  = lookup(var.settings.site_config, "api_management_api_id", false)
-      app_command_line                       = lookup(var.settings.site_config, "app_command_line", false)
-      application_insights_connection_string = lookup(var.settings.site_config, "application_insights_connection_string", false)
-      application_insights_key               = lookup(var.settings.site_config, "application_insights_key", false)
-      #      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
+      always_on                                     = lookup(var.settings.site_config, "always_on", false)
+      api_definition_url                            = lookup(var.settings.site_config, "api_definition_url", false)
+      api_management_api_id                         = lookup(var.settings.site_config, "api_management_api_id", false)
+      app_command_line                              = lookup(var.settings.site_config, "app_command_line", false)
+      application_insights_connection_string        = lookup(var.settings.site_config, "application_insights_connection_string", false)
+      application_insights_key                      = lookup(var.settings.site_config, "application_insights_key", false)
       container_registry_managed_identity_client_id = lookup(var.settings.site_config, "container_registry_managed_identity_client_id", false)
       container_registry_use_managed_identity       = lookup(var.settings.site_config, "container_registry_use_managed_identity", false)
-      default_documents                             = tolist(lookup(var.settings.site_config, "default_documents", false))
       elastic_instance_minimum                      = lookup(var.settings.site_config, "elastic_instance_minimum", null)
       ftps_state                                    = lookup(var.settings.site_config, "ftps_state", null)
       health_check_path                             = lookup(var.settings.site_config, "health_check_path", null)
@@ -50,6 +48,12 @@ resource "azurerm_linux_function_app" "function_app" {
       websockets_enabled                            = lookup(var.settings.site_config, "websockets_enabled", null)
       vnet_route_all_enabled                        = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
       worker_count                                  = lookup(var.settings.site_config, "worker_count", null)
+
+      // Expects a list, but doesn't like to list conversion
+      # default_documents                             = tolist(lookup(var.settings.site_config, "default_documents", false))
+
+      // Where does this live? It keeps throwing an error
+      # auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
 
       // Where does this block live? It keeps throwing an error for me
       #      dynamic "sticky_settings" {
