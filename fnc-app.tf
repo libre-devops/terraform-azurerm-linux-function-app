@@ -50,7 +50,6 @@ resource "azurerm_linux_function_app" "function_app" {
       websockets_enabled                            = lookup(var.settings.site_config, "websockets_enabled", null)
       vnet_route_all_enabled                        = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
       worker_count                                  = lookup(var.settings.site_config, "worker_count", null)
-      default_documents                             = try(tolist(var.settings.site_config.default_documents, null))
 
       // Expects a list, but doesn't like to list conversion
       # default_documents                             = tolist(lookup(var.settings.site_config, "default_documents", false))
