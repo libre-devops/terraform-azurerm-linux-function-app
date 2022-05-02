@@ -9,9 +9,10 @@ variable "app_name" {
   type        = string
 }
 
-variable "service_plan_id" {
-  description = "Id of the App Service Plan for Function App hosting"
-  type        = string
+variable "app_settings" {
+  description = "Function App application settings"
+  type        = map(any)
+  default     = {}
 }
 
 variable "builtin_logging_enabled" {
@@ -56,12 +57,6 @@ variable "force_disabled_content_share" {
   default     = false
 }
 
-variable "app_settings" {
-  description = "Function App application settings"
-  type        = map(any)
-  default     = {}
-}
-
 variable "function_app_vnet_integration_enabled" {
   description = "Enable VNET integration with the Function App. `function_app_vnet_integration_subnet_id` is mandatory if enabled"
   type        = bool
@@ -104,6 +99,11 @@ variable "location" {
 
 variable "rg_name" {
   description = "Resource group name"
+  type        = string
+}
+
+variable "service_plan_id" {
+  description = "Id of the App Service Plan for Function App hosting"
   type        = string
 }
 
