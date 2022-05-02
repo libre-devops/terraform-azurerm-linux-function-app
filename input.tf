@@ -141,9 +141,9 @@ variable "storage_key_vault_secret_id" {
 }
 
 variable "storage_uses_managed_identity" {
-  type        = string
+  type        = bool
   description = "If you want the storage account to use a managed identity instead of a access key"
-  default     = "false"
+  default     = false
 }
 
 variable "tags" {

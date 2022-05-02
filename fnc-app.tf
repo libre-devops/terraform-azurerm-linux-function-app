@@ -17,7 +17,7 @@ resource "azurerm_linux_function_app" "function_app" {
   storage_account_access_key = var.storage_account_access_key
 
   storage_key_vault_secret_id   = var.storage_account_name == null ? var.storage_key_vault_secret_id : null
-  storage_uses_managed_identity = var.storage_account_access_key != null ? var.storage_uses_managed_identity : null
+  storage_uses_managed_identity = var.storage_account_access_key == null ? var.storage_uses_managed_identity : null
 
   dynamic "site_config" {
     for_each = lookup(var.settings, "site_config", {}) != {} ? [1] : []
