@@ -15,6 +15,12 @@ variable "app_settings" {
   default     = {}
 }
 
+variable "backup_sas_url" {
+  description = "URL SAS to backup"
+  type        = string
+  default     = ""
+}
+
 variable "builtin_logging_enabled" {
   type        = bool
   description = "Whether AzureWebJobsDashboards should be enabled, default is true"
