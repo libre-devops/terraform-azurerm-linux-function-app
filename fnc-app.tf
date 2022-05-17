@@ -51,7 +51,6 @@ resource "azurerm_linux_function_app" "function_app" {
       vnet_route_all_enabled                        = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
       worker_count                                  = lookup(var.settings.site_config, "worker_count", null)
       default_documents                             = lookup(var.settings.site_config, "default_documents", false)
-      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
 
 
       dynamic "application_stack" {
