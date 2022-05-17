@@ -50,21 +50,9 @@ resource "azurerm_linux_function_app" "function_app" {
       websockets_enabled                            = lookup(var.settings.site_config, "websockets_enabled", null)
       vnet_route_all_enabled                        = lookup(var.settings.site_config, "vnet_route_all_enabled", null)
       worker_count                                  = lookup(var.settings.site_config, "worker_count", null)
+      default_documents                             = lookup(var.settings.site_config, "default_documents", false)
+      auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
 
-      // Expects a list, but doesn't like to list conversion
-      # default_documents                             = tolist(lookup(var.settings.site_config, "default_documents", false))
-
-      // Where does this live? It keeps throwing an error
-      # auto_swap_slot_name                           = lookup(var.settings.site_config, "auto_swap_slot_name", false)
-
-      // Where does this block live? It keeps throwing an error for me
-      #      dynamic "sticky_settings" {
-      #        for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
-      #        content {
-      #          app_setting_names       = lookup(var.settings.sticky_settings, "app_setting_names", false)
-      #          connection_string_names = lookup(var.settings.connection_string_names, "connection_string_name", false)
-      #        }
-      #      }
 
       dynamic "application_stack" {
         for_each = lookup(var.settings.site_config, "application_stack", {}) != {} ? [1] : []
@@ -226,6 +214,14 @@ resource "azurerm_linux_function_app" "function_app" {
       name  = lookup(connection_string.value, "name", null)
       type  = lookup(connection_string.value, "type", null)
       value = lookup(connection_string.value, "value", null)
+    }
+  }
+
+  dynamic "sticky_settings" {
+    for_each = lookup(var.settings, "sticky_settings", {}) != {} ? [1] : []
+    content {
+      app_setting_names       = lookup(var.settings.sticky_settings, "app_setting_names", false)
+      connection_string_names = lookup(var.settings.sticky_settings, "connection_string_name", false)
     }
   }
 
