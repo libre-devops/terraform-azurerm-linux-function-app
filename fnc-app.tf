@@ -284,14 +284,6 @@ resource "azurerm_linux_function_app" "function_app" {
     }
   }
 
-  dynamic "identity" {
-    for_each = length(var.identity_ids) > 0 || var.identity_type == "SystemAssigned, UserAssigned" ? [var.identity_type] : []
-    content {
-      type         = var.identity_type
-      identity_ids = length(var.identity_ids) > 0 ? var.identity_ids : []
-    }
-  }
-
   tags = var.tags
 }
 
