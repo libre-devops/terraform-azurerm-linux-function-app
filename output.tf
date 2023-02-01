@@ -1,11 +1,11 @@
 output "app_id" {
   description = "The app id of the application insights"
-  value       = azurerm_application_insights.app_insights_workspace[count.index].app_id
+  value       = azurerm_application_insights.app_insights_workspace.*.app_id
 }
 
 output "app_insights_connection_string" {
   description = "The connection string for the application insights"
-  value       = azurerm_application_insights.app_insights_workspace[count.index].connection_string
+  value       = azurerm_application_insights.app_insights_workspace.*.connection_string
 }
 
 output "custom_domain_vertification_id" {
@@ -40,7 +40,7 @@ output "fnc_site_credential" {
 
 output "instrumentation_key" {
   description = "The instrumentation key of app insights"
-  value       = azurerm_application_insights.app_insights_workspace[count.index].instrumentation_key
+  value       = azurerm_application_insights.app_insights_workspace.*.instrumentation_key
 }
 
 output "kind" {
