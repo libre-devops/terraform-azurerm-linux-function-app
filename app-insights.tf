@@ -16,7 +16,7 @@ resource "azurerm_application_insights" "app_insights_workspace" {
 
 locals {
   app_insights_settings = {
-    APPINSIGHTS_INSTRUMENTATIONKEY        = var.enable_app_insights == true ? azurerm_application_insights.app_insights_workspace[count.index].instrumentation_key : null
-    APPLICATIONINSIGHTS_CONNECTION_STRING = var.enable_app_insights == true ? azurerm_application_insights.app_insights_workspace[count.index].connection_string : null
+    APPINSIGHTS_INSTRUMENTATIONKEY        = var.enable_app_insights == true ? azurerm_application_insights.app_insights_workspace.*.instrumentation_key : null
+    APPLICATIONINSIGHTS_CONNECTION_STRING = var.enable_app_insights == true ? azurerm_application_insights.app_insights_workspace.*.connection_string : null
   }
 }
