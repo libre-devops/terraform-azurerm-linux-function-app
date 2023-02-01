@@ -1,6 +1,6 @@
 resource "azurerm_application_insights" "app_insights_workspace" {
   count                                 = var.enable_app_insights == true && var.connect_app_insights_to_law_workspace == true ? 1 : 0
-  name                                  = var.app_name
+  name                                  = var.app_insights_name
   location                              = var.location
   resource_group_name                   = var.rg_name
   workspace_id                          = var.workspace_id

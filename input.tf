@@ -40,6 +40,12 @@ variable "app_insights_local_authentication_disabled" {
   default     = null
 }
 
+variable "app_insights_name" {
+  type        = string
+  description = "The name of the app insights"
+  default     = null
+}
+
 variable "app_insights_sampling_percentage" {
   type        = string
   description = "The app insights sampling percentage"
@@ -222,6 +228,6 @@ variable "tags" {
 
 variable "workspace_id" {
   type        = string
-  description = "if app insights count is set to true. the workspace id"
+  description = "if app insights count is set to true, the ID of the workspace, not the workspace_id"
   default     = null
 }
