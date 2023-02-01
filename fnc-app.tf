@@ -3,8 +3,8 @@ resource "azurerm_linux_function_app" "function_app" {
   service_plan_id     = var.service_plan_id
   location            = var.location
   resource_group_name = var.rg_name
-  #  app_settings        = var.enable_app_insights == true ? merge(local.app_insights_settings_map, var.app_settings) : var.app_settings
-  app_settings                = var.app_settings
+  app_settings        = var.enable_app_insights == true ? merge(local.app_insights_settings_map, var.app_settings) : var.app_settings
+  #  app_settings                = var.app_settings
   https_only                  = var.https_only
   builtin_logging_enabled     = var.builtin_logging_enabled
   client_certificate_enabled  = var.client_certificate_enabled

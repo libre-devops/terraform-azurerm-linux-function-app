@@ -13,3 +13,12 @@ resource "azurerm_application_insights" "app_insights_workspace" {
   force_customer_storage_for_profiler   = try(var.app_insights_force_customer_storage_for_profile, false)
   sampling_percentage                   = try(var.app_insights_sampling_percentage, 100)
 }
+
+locals {
+  app_insights_settings = {
+    APPINSIGHTS_INSTRUMENTATIONKEY        = element(azurerm_application_insights.app_insights_workspace.*.instrumentation_key, 0),
+    APPLICATIONINSIGHTS_CONNECTION_STRING = element(azurerm_application_insights.app_insights_workspace.*.connection_string, 0)
+  }
+
+  app_insights_settings_map = tomap(local.app_insights_settings)
+}
