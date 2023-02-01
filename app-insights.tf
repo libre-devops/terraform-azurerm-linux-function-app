@@ -13,14 +13,3 @@ resource "azurerm_application_insights" "app_insights_workspace" {
   force_customer_storage_for_profiler   = try(var.app_insights_force_customer_storage_for_profile, false)
   sampling_percentage                   = try(var.app_insights_sampling_percentage, 100)
 }
-
-locals {
-  app_insights_settings = {
-    APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights_workspace.*.instrumentation_key
-    APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights_workspace.*.connection_string
-  }
-
-  app_insights_settings_map = {
-    for pair in local.app_insights_settings : pair.key => pair.value if var.enable_app_insights == true
-  }
-}
