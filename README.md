@@ -17,7 +17,6 @@ No modules.
 | Name | Type |
 |------|------|
 | [azurerm_app_service_virtual_network_swift_connection.function_vnet_integration](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/app_service_virtual_network_swift_connection) | resource |
-| [azurerm_application_insights.app_insights_non_workspace](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_insights) | resource |
 | [azurerm_application_insights.app_insights_workspace](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_insights) | resource |
 | [azurerm_linux_function_app.function_app](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_function_app) | resource |
 
@@ -32,6 +31,7 @@ No modules.
 | <a name="input_app_insights_internet_ingestion_enabled"></a> [app\_insights\_internet\_ingestion\_enabled](#input\_app\_insights\_internet\_ingestion\_enabled) | Whether internet ingestion is enabled | `bool` | `null` | no |
 | <a name="input_app_insights_internet_query_enabled"></a> [app\_insights\_internet\_query\_enabled](#input\_app\_insights\_internet\_query\_enabled) | Whether or not your workspace can be queried from the internet | `bool` | `null` | no |
 | <a name="input_app_insights_local_authentication_disabled"></a> [app\_insights\_local\_authentication\_disabled](#input\_app\_insights\_local\_authentication\_disabled) | Whether local authentication is disabled | `bool` | `null` | no |
+| <a name="input_app_insights_name"></a> [app\_insights\_name](#input\_app\_insights\_name) | The name of the app insights | `string` | `null` | no |
 | <a name="input_app_insights_sampling_percentage"></a> [app\_insights\_sampling\_percentage](#input\_app\_insights\_sampling\_percentage) | The app insights sampling percentage | `string` | `null` | no |
 | <a name="input_app_insights_type"></a> [app\_insights\_type](#input\_app\_insights\_type) | What the type of app insights to be made is | `string` | `null` | no |
 | <a name="input_app_name"></a> [app\_name](#input\_app\_name) | The name of the function app | `string` | n/a | yes |
@@ -63,7 +63,7 @@ No modules.
 | <a name="input_storage_key_vault_secret_id"></a> [storage\_key\_vault\_secret\_id](#input\_storage\_key\_vault\_secret\_id) | The secret ID for the connection string of the storage account used by the function app | `string` | `""` | no |
 | <a name="input_storage_uses_managed_identity"></a> [storage\_uses\_managed\_identity](#input\_storage\_uses\_managed\_identity) | If you want the storage account to use a managed identity instead of a access key | `bool` | `false` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of the tags to use on the resources that are deployed with this module. | `map(string)` | <pre>{<br>  "source": "terraform"<br>}</pre> | no |
-| <a name="input_workspace_id"></a> [workspace\_id](#input\_workspace\_id) | if app insights count is set to true. the workspace id | `string` | `null` | no |
+| <a name="input_workspace_id"></a> [workspace\_id](#input\_workspace\_id) | if app insights count is set to true, the ID of the workspace, not the workspace\_id | `string` | `null` | no |
 
 ## Outputs
 
