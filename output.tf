@@ -1,3 +1,13 @@
+output "app_id" {
+  description = "The app id of the application insights"
+  value       = azurerm_application_insights.app_insights_workspace[count.index].app_id
+}
+
+output "app_insights_connection_string" {
+  description = "The connection string for the application insights"
+  value       = azurerm_application_insights.app_insights_workspace[count.index].connection_string
+}
+
 output "custom_domain_vertification_id" {
   value       = azurerm_linux_function_app.function_app.custom_domain_verification_id
   description = "The identifier for DNS txt ownership"
@@ -26,6 +36,11 @@ output "fnc_identity" {
 output "fnc_site_credential" {
   value       = azurerm_linux_function_app.function_app.site_credential
   description = "The site credential block"
+}
+
+output "instrumentation_key" {
+  description = "The instrumentation key of app insights"
+  value       = azurerm_application_insights.app_insights_workspace[count.index].instrumentation_key
 }
 
 output "kind" {
