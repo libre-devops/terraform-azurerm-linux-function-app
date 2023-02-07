@@ -12,6 +12,7 @@ resource "azurerm_application_insights" "app_insights_workspace" {
   local_authentication_disabled         = try(var.app_insights_local_authentication_disabled, true)
   force_customer_storage_for_profiler   = try(var.app_insights_force_customer_storage_for_profile, false)
   sampling_percentage                   = try(var.app_insights_sampling_percentage, 100)
+  tags                                  = try(var.tags, null)
 }
 
 locals {
