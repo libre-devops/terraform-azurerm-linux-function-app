@@ -13,7 +13,6 @@ resource "azurerm_user_assigned_identity" "uid" {
   tags                = module.rg.rg_tags
 }
 
-
 module "shared_vars" {
   source = "libre-devops/shared-vars/azurerm"
 }
@@ -71,9 +70,13 @@ module "role_assignments" {
   role_assignments = [
     {
       principal_ids = [azurerm_user_assigned_identity.uid.principal_id]
-      role_names    = ["Key Vault Administrator", "Storage Blob Data Owner"]
+      role_names    = ["Key Vault Administrator", "Storage Blob Data Owner", "Storage Blob Data Reader"]
       scope         = module.rg.rg_id
-      set_condition = true
+    },
+    {
+      principal_ids = [module.linux_function_app.function_app_identities["fnc-${var.short}-${var.loc}-${var.env}-01"].principal_id]
+      role_names    = ["Key Vault Administrator", "Storage Blob Data Owner", "Storage Blob Data Reader", "Key Vault Secrets Officer", "Storage Account Contributor"]
+      scope         = module.rg.rg_id
     },
   ]
 }
@@ -115,10 +118,14 @@ module "key_vault" {
       purge_protection_enabled        = false
       public_network_access_enabled   = true
       network_acls = {
-        default_action             = "Deny"
-        bypass                     = "AzureServices"
-        ip_rules                   = [chomp(data.http.user_ip.response_body)]
-        virtual_network_subnet_ids = [module.network.subnets_ids["subnet1"]]
+        default_action = "Deny"
+        bypass         = "AzureServices"
+        ip_rules       = concat([chomp(data.http.user_ip.response_body)], local.function_app_outbound_ips)
+        virtual_network_subnet_ids = [
+          module.network.subnets_ids["subnet1"],
+          module.network.subnets_ids["subnet2"],
+          module.network.subnets_ids["subnet3"]
+        ]
       }
     },
   ]
@@ -136,6 +143,7 @@ module "sa" {
       identity_type = "UserAssigned"
       identity_ids  = [azurerm_user_assigned_identity.uid.id]
 
+      shared_access_keys_enabled                      = true
       create_diagnostic_settings                      = true
       diagnostic_settings_enable_all_logs_and_metrics = false
       diagnostic_settings = {
@@ -146,45 +154,53 @@ module "sa" {
           }
         ]
       }
-
-      network_rules = {
-        bypass                     = ["AzureServices"]
-        default_action             = "Deny"
-        ip_rules                   = [chomp(data.http.user_ip.response_body)]
-        virtual_network_subnet_ids = [module.network.subnets_ids["subnet1"]]
-      }
     },
   ]
 }
 
+resource "azurerm_storage_account_network_rules" "rules" {
+  default_action     = "Deny"
+  storage_account_id = module.sa.storage_account_ids["sa${var.short}${var.loc}${var.env}01"]
+  ip_rules           = concat([chomp(data.http.user_ip.response_body)], local.function_app_outbound_ips)
+  virtual_network_subnet_ids = [
+    module.network.subnets_ids["subnet1"],
+    module.network.subnets_ids["subnet2"],
+    module.network.subnets_ids["subnet3"]
+  ]
+}
 
-module "windows_function_app" {
+
+module "linux_function_app" {
   source = "../../"
 
   depends_on = [module.law]
 
   # Application Insights Configuration
-  windows_function_apps = [
+  linux_function_apps = [
     {
       name     = "fnc-${var.short}-${var.loc}-${var.env}-01"
       rg_name  = module.rg.rg_name
       location = module.rg.rg_location
       tags     = module.rg.rg_tags
 
-      os_type  = "Windows"
-      sku_name = "P1v2"
+      os_type  = "Linux"
+      sku_name = "FC1"
       app_settings = {
-        "FUNCTIONS_WORKER_RUNTIME" = "dotnet-isolated"
-        "DOTNET_ENVIRONMENT"       = "Production"
+        "FUNCTIONS_WORKER_RUNTIME"               = "dotnet-isolated"
+        "DOTNET_ENVIRONMENT"                     = "Production"
+        "AzureWebJobsStorage__accountName"       = module.sa.storage_account_names["sa${var.short}${var.loc}${var.env}01"]
+        "WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED" = "1"
+        "AzureSubscriptionId"                    = data.azurerm_client_config.current_creds.subscription_id                     # Replace with actual value
+        "StorageAccountResourceGroup"            = module.rg.rg_name                                                            # Replace with actual value
+        "StorageAccountName"                     = "${module.sa.storage_account_names["sa${var.short}${var.loc}${var.env}01"]}" # Replace with actual value
+        "KeyVaultUri"                            = "kv-${var.short}-${var.loc}-${var.env}-tst-01"                               # Replace with actual value
       }
-      builtin_logging_enabled         = true
-      public_network_access_enabled   = true
-      key_vault_reference_identity_id = azurerm_user_assigned_identity.uid.id
-      virtual_network_subnet_id       = module.network.subnets_ids["subnet3"]
-      identity_type                   = "UserAssigned"
-      identity_ids                    = [azurerm_user_assigned_identity.uid.id]
-      storage_account_name            = module.sa.storage_account_names["sa${var.short}${var.loc}${var.env}01"]
-      storage_uses_managed_identity   = true
+      builtin_logging_enabled       = true
+      public_network_access_enabled = true
+      virtual_network_subnet_id     = module.network.subnets_ids["subnet3"]
+      identity_type                 = "SystemAssigned"
+      storage_account_name          = module.sa.storage_account_names["sa${var.short}${var.loc}${var.env}01"]
+      storage_uses_managed_identity = true
 
 
       create_new_app_insights                            = true
@@ -193,23 +209,34 @@ module "windows_function_app" {
       app_insights_type                                  = "web"
       app_insights_daily_cap_in_gb                       = 0.5
       app_insights_daily_data_cap_notifications_disabled = false
-      app_insights_internet_ingestion_enabled            = false
-      app_insights_internet_query_enabled                = false
+      app_insights_internet_ingestion_enabled            = true
+      app_insights_internet_query_enabled                = true
       app_insights_local_authentication_disabled         = true
       app_insights_sampling_percentage                   = 100
 
       # Site Configuration
       site_config = {
         always_on              = true
-        minimum_tls_version    = "1.2"
+        minimum_tls_version    = "1.3"
         vnet_route_all_enabled = true
         use_32_bit_worker      = false
         worker_count           = 1
+        cors = {
+          allowed_origins = ["https://portal.azure.com"]
+        }
         application_stack = {
-          dotnet_version              = "v8.0"
+          dotnet_version              = "8.0"
           use_dotnet_isolated_runtime = true
         }
       }
     }
   ]
 }
+
+locals {
+  function_app_outbound_ips = flatten([
+    for ips in values(module.linux_function_app.function_apps_possible_outbound_ip_addresses) :
+    split(",", ips)
+  ])
+}
+

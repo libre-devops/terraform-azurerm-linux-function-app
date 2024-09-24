@@ -44,11 +44,6 @@ output "function_apps_site_credentials" {
   value       = { for app in azurerm_linux_function_app.function_app : app.name => app.site_credential }
 }
 
-output "function_vnet_integration_ids" {
-  description = "The IDs of the App Service Virtual Network Swift Connections."
-  value       = { for conn in azurerm_app_service_virtual_network_swift_connection.function_vnet_integration : conn.name => conn.id }
-}
-
 output "linux_function_apps_ids" {
   description = "The IDs of the Linux Function Apps."
   value       = { for app in azurerm_linux_function_app.function_app : app.name => app.id }

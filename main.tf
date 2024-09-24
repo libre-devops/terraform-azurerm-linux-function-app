@@ -334,7 +334,7 @@ resource "azurerm_linux_function_app" "function_app" {
 
 
   dynamic "site_config" {
-    for_each = each.value.site_settings != null ? [each.value.site_settings] : []
+    for_each = each.value.site_config != null ? [each.value.site_config] : []
 
     content {
       always_on                                     = site_config.value.always_on
@@ -377,7 +377,7 @@ resource "azurerm_linux_function_app" "function_app" {
           use_custom_runtime      = application_stack.value.use_custom_runtime
 
           dynamic "docker" {
-            for_each = application_stack.value.docker != null ? [application_stack.value.docker] : []
+            for_each = application_stack.value.docker != null ? application_stack.value.docker : []
             content {
               registry_url      = docker.value.registry_url
               registry_username = docker.value.registry_username

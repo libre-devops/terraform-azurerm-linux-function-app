@@ -203,7 +203,7 @@ variable "linux_function_apps" {
         oauth_scopes               = optional(list(string))
       }))
     }))
-    site_settings = optional(object({
+    site_config = optional(object({
       always_on                                     = optional(bool)
       api_definition_url                            = optional(string)
       api_management_api_id                         = optional(string)
@@ -285,8 +285,6 @@ variable "linux_function_apps" {
         }))
       })))
     }))
-    enable_vnet_integration = optional(bool)
-    subnet_id               = optional(string)
   }))
   default = []
 }
