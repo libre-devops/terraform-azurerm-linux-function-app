@@ -185,7 +185,7 @@ module "linux_function_app" {
       tags     = module.rg.rg_tags
 
       os_type  = "Linux"
-      sku_name = "FC1"
+      sku_name = "EP1"
       app_settings = {
         "FUNCTIONS_WORKER_RUNTIME"               = "dotnet-isolated"
         "DOTNET_ENVIRONMENT"                     = "Production"
