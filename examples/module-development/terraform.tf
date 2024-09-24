@@ -6,6 +6,10 @@ terraform {
       #      configuration_aliases = [azurerm.default-provider]
       #      version = "~> 2.68.0"
     }
+
+    random = {
+      source = "hashicorp/random"
+    }
   }
   backend "azurerm" {
   }
