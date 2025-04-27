@@ -406,7 +406,7 @@ resource "azurerm_linux_function_app" "function_app" {
       }
 
       dynamic "ip_restriction" {
-        for_each = site_config.value.ip_restriction != null ? [site_config.value.ip_restriction] : []
+        for_each = site_config.value.ip_restriction != null ? site_config.value.ip_restriction : []
 
         content {
           ip_address                = ip_restriction.value.ip_address
@@ -430,7 +430,7 @@ resource "azurerm_linux_function_app" "function_app" {
       }
 
       dynamic "scm_ip_restriction" {
-        for_each = site_config.value.scm_ip_restriction != null ? [site_config.value.scm_ip_restriction] : []
+        for_each = site_config.value.scm_ip_restriction != null ? site_config.value.scm_ip_restriction : []
 
         content {
           ip_address                = scm_ip_restriction.value.ip_address
