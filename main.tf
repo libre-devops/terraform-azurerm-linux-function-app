@@ -97,7 +97,7 @@ resource "azurerm_linux_function_app" "function_app" {
     content {
       name                = backup.value.name
       enabled             = backup.value.enabled
-      storage_account_url = try(backup.value.storage_account_url, var.backup_sas_url)
+      storage_account_url = try(backup.value.storage_account_url, backup.value.backup_sas_url)
 
       dynamic "schedule" {
         for_each = backup.value.schedule != null ? [backup.value.schedule] : []
