@@ -65,6 +65,7 @@ variable "linux_function_apps" {
       name                = optional(string)
       enabled             = optional(bool)
       storage_account_url = optional(string)
+      backup_sas_url = optional(string)
       schedule = optional(object({
         frequency_interval       = optional(string)
         frequency_unit           = optional(string)
