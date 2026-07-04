@@ -1,8 +1,31 @@
-# Linux Function App
+<!--
+  Keep the title and badges OUTSIDE the centered <div>: the Terraform Registry's markdown renderer
+  does not parse markdown inside an HTML block, so a # heading or [![badge]] in the div renders as
+  literal text on the registry. Only the logo (HTML) goes in the div.
+-->
+<div align="center">
+  <a href="https://libredevops.org">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://libredevops.org/assets/libre-devops-white.png">
+      <img alt="Libre DevOps" src="https://libredevops.org/assets/libre-devops-black.png" width="300">
+    </picture>
+  </a>
+</div>
+
+# Terraform Azure Linux Function App
 
 Terraform module for Azure Linux function apps on normal App Service plans (Consumption Y1,
 Elastic Premium, dedicated B/S/P, and App Service Environments), in the Libre DevOps style:
 fast to get going, secure by default, flexible when it matters.
+
+[![CI](https://github.com/libre-devops/terraform-azurerm-linux-function-app/actions/workflows/ci.yml/badge.svg)](https://github.com/libre-devops/terraform-azurerm-linux-function-app/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/libre-devops/terraform-azurerm-linux-function-app?sort=semver&label=release)](https://github.com/libre-devops/terraform-azurerm-linux-function-app/releases/latest)
+[![Terraform Registry](https://img.shields.io/badge/registry-libre--devops-7B42BC?logo=terraform&logoColor=white)](https://registry.terraform.io/namespaces/libre-devops)
+[![License](https://img.shields.io/github/license/libre-devops/terraform-azurerm-linux-function-app)](./LICENSE)
+
+---
+
+## Overview
 
 ```hcl
 module "linux_function_app" {
