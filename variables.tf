@@ -420,7 +420,7 @@ variable "function_apps" {
   validation {
     condition = alltrue([
       for a in values(var.function_apps) :
-      try(a.site_config.cors.allowed_origins, null) == null || !try(a.site_config.cors.support_credentials, false) || !contains(a.site_config.cors.allowed_origins, "*")
+      try(a.site_config.cors, null) == null ? true : !(coalesce(a.site_config.cors.support_credentials, false) && contains(coalesce(a.site_config.cors.allowed_origins, []), "*"))
     ])
     error_message = "CORS cannot combine the * wildcard origin with support_credentials = true."
   }
