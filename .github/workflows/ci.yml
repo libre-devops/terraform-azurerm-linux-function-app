@@ -126,7 +126,15 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deploy and verify each function app
+      # This stage code-deploys the DEDICATED-plan app (the complete stack's B1 API). Linux
+      # Consumption (Y1) apps deliberately are NOT code-deployed here: Linux Consumption has no
+      # Kudu/SCM site, so `az functionapp deployment source config-zip` refuses it ("The Azure
+      # CLI does not support this deployment path") and the only supported method is
+      # run-from-package with an external package URL (WEBSITE_RUN_FROM_PACKAGE = a SAS URL),
+      # verified live. The minimal (Y1) stack is still applied and destroyed to prove
+      # provisioning; its deploy path is documented in the README rather than exercised here,
+      # because the keyless SAS ceremony it needs is a consumer concern, not the module's.
+      - name: Deploy and verify the dedicated-plan function app
         shell: bash
         run: |
           set -euo pipefail
@@ -153,7 +161,7 @@ jobs:
               [ "$attempt" = "3" ] || sleep 20
             done || true
 
-            for i in $(seq 1 20); do
+            for i in $(seq 1 40); do
               code=$(curl -s -o /dev/null -w '%{http_code}' "https://${app}.azurewebsites.net${path}")
               echo "== ${app}: attempt ${i}: HTTP ${code}"
               [ "$code" = "200" ] && return 0
@@ -163,7 +171,6 @@ jobs:
             return 1
           }
 
-          deploy_and_verify "rg-ldo-${loc}-${ws}-001" "func-lfa-ldo-${loc}-${ws}-001"  "examples/minimal/app"  "/api/hello"
           deploy_and_verify "rg-ldo-${loc}-${ws}-002" "func-lapi-ldo-${loc}-${ws}-002" "examples/complete/app" "/api/hello"
 
   self-test-destroy:

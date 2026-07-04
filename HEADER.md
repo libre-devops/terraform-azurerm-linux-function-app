@@ -42,12 +42,22 @@ the legacy builtin logging off. Every default has an explicit override.
 - **Identity in every shape.** The default attaches both kinds with a module-created UAI
   (system-assigned plus deploy-during-create is a bootstrap deadlock); bring your own of any
   type; or none at all (keys-on apps).
-- **A deploy story with its eyes open.** `zip_deploy_file` works on normal plans but relies on
-  the basic-auth publishing profile this module disables by default (a validation enforces the
-  pairing with `WEBSITE_RUN_FROM_PACKAGE` or `SCM_DO_BUILD_DURING_DEPLOYMENT` if you opt in).
-  The honest default is the AAD push after apply: `az functionapp deployment source config-zip`
-  with vendored dependencies, which is exactly what this repo's staged CI does (apply, deploy
-  with a fresh login, curl the endpoints as the real gate, destroy).
+- **A deploy story that is honest about the plan.** Deployment differs by plan type, and this
+  bit us live so it is documented plainly:
+  - **Dedicated (B/S/P) and Elastic Premium** apps have a Kudu/SCM site, so
+    `az functionapp deployment source config-zip` (and `zip_deploy_file`) work. The staged CI
+    proves this end to end on the complete example's B1 app: apply, push the vendored package
+    with a fresh login, curl the endpoint as the real gate, destroy.
+  - **Consumption (Y1)** apps have NO Kudu/SCM site, so config-zip is refused ("The Azure CLI
+    does not support this deployment path"); the only supported method is run-from-package with
+    an external package URL (`WEBSITE_RUN_FROM_PACKAGE` set to a package SAS URL, keyless via a
+    user-delegation SAS or keys-on via an account SAS). The minimal example runs on Y1 to show
+    the cheap one-liner default, and CI proves it provisions; deploy it with the run-from-package
+    method.
+  - `zip_deploy_file` relies on the basic-auth publishing profile this module disables by
+    default, so opting into it also requires `webdeploy_publish_basic_authentication_enabled = true`
+    plus `WEBSITE_RUN_FROM_PACKAGE` or `SCM_DO_BUILD_DURING_DEPLOYMENT` (a validation enforces
+    the pairing). The AAD push after apply needs none of that.
 - **Application Insights, AAD-ingestion ready.** Pass the connection string and the AI id and
   the module wires the app setting, the AAD ingestion auth string, and the Monitoring Metrics
   Publisher grant (gated on a plan-known flag).
