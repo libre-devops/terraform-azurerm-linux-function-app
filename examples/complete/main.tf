@@ -84,10 +84,11 @@ module "linux_function_app" {
       grant_app_insights_metrics_publisher = true
 
       site_config = {
-        always_on           = true
-        health_check_path   = "/api/health"
-        http2_enabled       = true
-        minimum_tls_version = "1.3"
+        always_on                         = true
+        health_check_path                 = "/api/health"
+        health_check_eviction_time_in_min = 5
+        http2_enabled                     = true
+        minimum_tls_version               = "1.3"
 
         application_stack = { python_version = "3.12" }
 
