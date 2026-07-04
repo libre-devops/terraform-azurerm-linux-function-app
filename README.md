@@ -45,9 +45,11 @@ the legacy builtin logging off. Every default has an explicit override.
 - **A deploy story that is honest about the plan.** Deployment differs by plan type, and this
   bit us live so it is documented plainly:
   - **Dedicated (B/S/P) and Elastic Premium** apps have a Kudu/SCM site, so
-    `az functionapp deployment source config-zip` (and `zip_deploy_file`) work. The staged CI
-    proves this end to end on the complete example's B1 app: apply, push the vendored package
-    with a fresh login, curl the endpoint as the real gate, destroy.
+    `az functionapp deployment source config-zip` AND the Terraform-native `zip_deploy_file`
+    both work (both verified live; `zip_deploy_file` on a B1 function app deployed and answered,
+    unlike the flex module where it is broken). The staged CI proves the config-zip path end to
+    end on the complete example's B1 app: apply, push the vendored package with a fresh login,
+    curl the endpoint as the real gate, destroy.
   - **Consumption (Y1)** apps have NO Kudu/SCM site, so config-zip is refused ("The Azure CLI
     does not support this deployment path"); the only supported method is run-from-package with
     an external package URL (`WEBSITE_RUN_FROM_PACKAGE` set to a package SAS URL, keyless via a
