@@ -1,0 +1,19 @@
+misconfigurations:
+  - id: AVD-AZU-0012
+    statement: >-
+      The module's created storage accounts carry no network rules by default, deliberately: the
+      host and deployment service reach app storage from platform ranges, so IP allow-listing the
+      app's published outbound IPs is not a reliable lockdown (verified live on the sibling flex
+      module). The working lockdown is VNet integration plus service endpoints or private
+      endpoints, which is caller topology and expressible through the per-app
+      storage_network_rules input.
+  - id: AVD-AZU-0060
+    statement: >-
+      Customer-managed keys are a deliberate non-goal for function deployment package storage;
+      platform-managed keys plus the module's default infrastructure encryption (double
+      encryption) are the accepted posture.
+  - id: AVD-AZU-0057
+    statement: >-
+      Classic Storage Analytics logging is superseded by diagnostic settings, which belong to the
+      caller's observability topology (the diagnostic-settings module) rather than inside this
+      module.

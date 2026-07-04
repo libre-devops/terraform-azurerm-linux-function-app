@@ -1,55 +1,58 @@
-output "function_app_identities" {
-  description = "The identities of the Storage Accounts."
+output "default_hostnames" {
+  description = "Map of app name to default hostname."
+  value       = { for k, a in azurerm_linux_function_app.this : k => a.default_hostname }
+}
+
+output "function_app_ids" {
+  description = "Map of app name to app id."
+  value       = { for k, a in azurerm_linux_function_app.this : k => a.id }
+}
+
+output "function_app_ids_zipmap" {
+  description = "Map of app name to { name, id } for easy composition."
+  value       = { for k, a in azurerm_linux_function_app.this : k => { name = a.name, id = a.id } }
+}
+
+output "function_apps" {
+  description = "Map of app name to the full linux function app object. Sensitive as a whole because the object carries storage_account_access_key and the site credentials; the ids, hostnames, and identity maps alongside stay plain for composition."
+  value       = azurerm_linux_function_app.this
+  sensitive   = true
+}
+
+output "identity_principal_ids" {
+  description = "Map of app name to { system_assigned, user_assigned } principal ids (nulls where an identity kind is absent)."
   value = {
-    for key, value in azurerm_linux_function_app.function_app : key =>
-    length(value.identity) > 0 ? {
-      type         = try(value.identity[0].type, null)
-      principal_id = try(value.identity[0].principal_id, null)
-      tenant_id    = try(value.identity[0].tenant_id, null)
-      } : {
-      type         = null
-      principal_id = null
-      tenant_id    = null
+    for k, a in azurerm_linux_function_app.this : k => {
+      system_assigned = try(a.identity[0].principal_id, null)
+      user_assigned   = try(azurerm_user_assigned_identity.this[k].principal_id, null)
     }
   }
 }
 
-output "function_app_names" {
-  description = "The default name of the Linux Function Apps."
-  value       = { for app in azurerm_linux_function_app.function_app : app.name => app.name }
+output "possible_outbound_ip_address_lists" {
+  description = "Map of app name to the possible outbound IP address list."
+  value       = { for k, a in azurerm_linux_function_app.this : k => a.possible_outbound_ip_address_list }
 }
 
-output "function_apps_custom_domain_verification_id" {
-  description = "The custom domain verification IDs of the Linux Function Apps."
-  value       = { for app in azurerm_linux_function_app.function_app : app.name => app.custom_domain_verification_id }
+output "service_plan_ids" {
+  description = "Map of plan name (or app name for auto-created plans) to plan id."
+  value = merge(
+    { for k, p in azurerm_service_plan.this : k => p.id },
+    { for k, p in azurerm_service_plan.auto : "asp-${k}" => p.id },
+  )
 }
 
-output "function_apps_default_hostnames" {
-  description = "The default hostnames of the Linux Function Apps."
-  value       = { for app in azurerm_linux_function_app.function_app : app.name => app.default_hostname }
+output "storage_account_ids" {
+  description = "Map of app name to the module-created storage account id (only apps with create_storage_account)."
+  value       = { for k, s in azurerm_storage_account.this : k => s.id }
 }
 
-output "function_apps_outbound_ip_addresses" {
-  description = "The outbound IP addresses of the Linux Function Apps."
-  value       = { for app in azurerm_linux_function_app.function_app : app.name => app.outbound_ip_addresses }
+output "storage_account_names" {
+  description = "Map of app name to the module-created storage account name (only apps with create_storage_account)."
+  value       = { for k, s in azurerm_storage_account.this : k => s.name }
 }
 
-output "function_apps_possible_outbound_ip_addresses" {
-  description = "The possible outbound IP addresses of the Linux Function Apps."
-  value       = { for app in azurerm_linux_function_app.function_app : app.name => app.possible_outbound_ip_addresses }
-}
-
-output "function_apps_site_credentials" {
-  description = "The site credentials for the Linux Function Apps."
-  value       = { for app in azurerm_linux_function_app.function_app : app.name => app.site_credential }
-}
-
-output "linux_function_apps_ids" {
-  description = "The IDs of the Linux Function Apps."
-  value       = { for app in azurerm_linux_function_app.function_app : app.name => app.id }
-}
-
-output "service_plans_ids" {
-  description = "The IDs of the Service Plans."
-  value       = { for plan in azurerm_service_plan.service_plan : plan.name => plan.id }
+output "user_assigned_identity_ids" {
+  description = "Map of app name to the module-created user assigned identity id (only apps with create_user_assigned_identity)."
+  value       = { for k, i in azurerm_user_assigned_identity.this : k => i.id }
 }

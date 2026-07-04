@@ -1,0 +1,197 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate (analyzer, fmt, validate, test, tflint, trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.9"
+
+      - name: PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module PSScriptAnalyzer -MinimumVersion 1.21.0 -Force -Scope CurrentUser
+          $results = Invoke-ScriptAnalyzer -Path ./Sort-LdoTerraform.ps1 -Settings ./PSScriptAnalyzerSettings.psd1
+          if ($results) { $results | Format-Table -AutoSize | Out-String | Write-Host }
+          $errors = @($results | Where-Object { $_.Severity -eq 'Error' })
+          if ($errors.Count -gt 0) { throw "PSScriptAnalyzer found $($errors.Count) error(s)." }
+          Write-Host 'PSScriptAnalyzer: clean.'
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Validate and test the module and examples
+        run: |
+          set -euo pipefail
+          for d in . examples/minimal examples/complete; do
+            echo "== ${d} =="
+            terraform -chdir="${d}" init -backend=false -input=false >/dev/null
+            terraform -chdir="${d}" validate
+          done
+          terraform test
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93 # v6.2.2
+
+      - name: TFLint (examples)
+        run: |
+          set -euo pipefail
+          for d in examples/*/; do
+            echo "== ${d%/} =="
+            ( cd "${d%/}" && tflint --init && tflint --recursive )
+          done
+
+      - name: Trivy config scan (report CRITICAL to LOW, non-blocking)
+        env:
+          TRIVY_IGNOREFILE: .trivyignore.yaml
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: CRITICAL,HIGH,MEDIUM,LOW
+          exit-code: "0"
+
+      - name: Trivy config gate (fail on HIGH or CRITICAL)
+        env:
+          TRIVY_IGNOREFILE: .trivyignore.yaml
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+  # Staged live self-test, same shape as the flex repo's and for a related reason: the module's
+  # secure defaults turn basic-auth publishing OFF, which is exactly what the in-apply
+  # zip_deploy_file path relies on, so the honest deploy story is the AAD push after apply.
+  # Stage 1 applies the stacks, stage 2 deploys the packages with a fresh OIDC login and verifies
+  # the endpoints answer, stage 3 destroys everything. The packages are vendored on the runner
+  # (build where the internet is) so nothing depends on a server-side build.
+  # Trigger with: gh workflow run ci.yml
+  self-test-apply:
+    name: Self-test 1 - apply the stacks
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      TF_VAR_loc: eus
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Plan and apply the example stacks
+        uses: libre-devops/terraform-azure@v1
+        with:
+          terraform-code-location: examples
+          terraform-stack-to-run-json: '["minimal","complete"]'
+          run-terraform-plan: true
+          run-terraform-apply: true
+          arm-client-id: ${{ vars.AZURE_CLIENT_ID }}
+          arm-tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          arm-subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          firewall-storage-account-name: ${{ secrets.TFSTATE_STORAGE_ACCOUNT }}
+          firewall-storage-resource-group: ${{ secrets.TFSTATE_RESOURCE_GROUP }}
+          terraform-init-extra-args-json: '["-reconfigure","-upgrade","-backend-config=resource_group_name=${{ secrets.TFSTATE_RESOURCE_GROUP }}","-backend-config=storage_account_name=${{ secrets.TFSTATE_STORAGE_ACCOUNT }}","-backend-config=container_name=${{ secrets.TFSTATE_BLOB_CONTAINER }}"]'
+
+  self-test-deploy:
+    name: Self-test 2 - deploy and verify the functions
+    needs: self-test-apply
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (fresh OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy and verify each function app
+        shell: bash
+        run: |
+          set -euo pipefail
+          loc="eus"
+          ws="dev"
+
+          deploy_and_verify() {
+            local rg="$1" app="$2" src="$3" path="$4"
+            local pkg
+            pkg="$(mktemp -d)/app.zip"
+
+            # Vendor the dependencies into the package layout the Functions host loads, so
+            # nothing is built (or downloaded) server-side.
+            pip install --quiet --target "${src}/.python_packages/lib/site-packages" -r "${src}/requirements.txt"
+
+            (cd "$src" && zip -q -r "$pkg" .)
+            echo "== ${app}: pushing $(du -h "$pkg" | cut -f1) package"
+            # The push retries on its own (three attempts, spaced), separately from the curl
+            # gate: a transient SCM hiccup should cost seconds, not the whole verification
+            # budget. Success is only ever judged by the curls below.
+            for attempt in 1 2 3; do
+              echo "== ${app}: push attempt ${attempt}"
+              az functionapp deployment source config-zip --resource-group "$rg" --name "$app" --src "$pkg" && break
+              [ "$attempt" = "3" ] || sleep 20
+            done || true
+
+            for i in $(seq 1 20); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "https://${app}.azurewebsites.net${path}")
+              echo "== ${app}: attempt ${i}: HTTP ${code}"
+              [ "$code" = "200" ] && return 0
+              sleep 15
+            done
+            echo "== ${app}: endpoint never answered"
+            return 1
+          }
+
+          deploy_and_verify "rg-ldo-${loc}-${ws}-001" "func-lfa-ldo-${loc}-${ws}-001"  "examples/minimal/app"  "/api/hello"
+          deploy_and_verify "rg-ldo-${loc}-${ws}-002" "func-lapi-ldo-${loc}-${ws}-002" "examples/complete/app" "/api/hello"
+
+  self-test-destroy:
+    name: Self-test 3 - destroy the stacks
+    # Runs even when apply or deploy failed: destroying whatever landed in state is the
+    # cost-control backstop.
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && needs.self-test-apply.result != 'skipped' }}
+    needs: [self-test-apply, self-test-deploy]
+    runs-on: ubuntu-latest
+    env:
+      TF_VAR_loc: eus
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Plan-destroy and destroy the example stacks
+        uses: libre-devops/terraform-azure@v1
+        with:
+          terraform-code-location: examples
+          terraform-stack-to-run-json: '["minimal","complete"]'
+          run-terraform-plan: false
+          run-terraform-plan-destroy: true
+          run-terraform-destroy: true
+          arm-client-id: ${{ vars.AZURE_CLIENT_ID }}
+          arm-tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          arm-subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          firewall-storage-account-name: ${{ secrets.TFSTATE_STORAGE_ACCOUNT }}
+          firewall-storage-resource-group: ${{ secrets.TFSTATE_RESOURCE_GROUP }}
+          terraform-init-extra-args-json: '["-reconfigure","-upgrade","-backend-config=resource_group_name=${{ secrets.TFSTATE_RESOURCE_GROUP }}","-backend-config=storage_account_name=${{ secrets.TFSTATE_STORAGE_ACCOUNT }}","-backend-config=container_name=${{ secrets.TFSTATE_BLOB_CONTAINER }}"]'
