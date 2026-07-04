@@ -88,7 +88,7 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     env:
-      TF_VAR_loc: eus
+      TF_VAR_loc: euw
     permissions:
       id-token: write
       contents: read
@@ -130,7 +130,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          loc="eus"
+          loc="euw"
           ws="dev"
 
           deploy_and_verify() {
@@ -174,7 +174,7 @@ jobs:
     needs: [self-test-apply, self-test-deploy]
     runs-on: ubuntu-latest
     env:
-      TF_VAR_loc: eus
+      TF_VAR_loc: euw
     permissions:
       id-token: write
       contents: read
